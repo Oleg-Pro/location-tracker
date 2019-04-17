@@ -12,9 +12,12 @@
 */
 
 Auth::routes(['verify' => true]);
+Route::get('logout', 'Auth\LoginController@logout');
 
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/locations-report', 'HomeController@locationsReport')->name('locations-report');
+Route::get('/api-key', 'HomeController@apiKey')->name('api-key');
+Route::post('/generate-api-key', 'HomeController@generateApiKey')->name('generate-api-key');
 
 
 Route::get('/person-locations/{id}/date/{date?}', 'PersonController@personLocations')

@@ -46,7 +46,6 @@ class HomeController extends Controller
 
     public function locationsReport(Request $request)
     {
-
         $user = $request->user();
         $people = Person::with(['city', 'user'])
             ->orderBy('last_name')
@@ -57,5 +56,17 @@ class HomeController extends Controller
             })->get();
 
         return view('locations-report', compact('people'));
+    }
+
+    public function apiKey(Request $request)
+    {
+        $apiKey = $request->user()->api_token;
+        return view('api-key', compact('apiKey'));
+    }
+
+    public function generateApiKey(Request $request)
+    {
+        $apiKey = $request->user()->generateToken();
+        return compact('apiKey');
     }
 }

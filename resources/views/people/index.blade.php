@@ -45,6 +45,9 @@
                         @endforeach
                         </tbody>
                     </table>
+                    @if ($paginated)
+                    {{ $people->links() }}
+                    @endif
                 </div>
             </div>
         </div>

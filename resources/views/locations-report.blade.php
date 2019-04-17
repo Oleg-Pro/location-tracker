@@ -43,10 +43,8 @@
 
         function getPersonData(person_id, date, displayCallback) {
             const url = '/person-locations/' + person_id + '/date/' +  date;
-            console.log(url);
             $.getJSON(url).done(function(data) {
                 displayCallback(data);
-                console.log(data);
             });
         }
 
@@ -56,7 +54,6 @@
             myMap.geoObjects.removeAll();
             if (!personData[0].person_locations.length) {
                 let center = [personData[0].city.latitude, personData[0].city.longitude];
-                console.log(center);
                 myMap.setCenter(center, 17);
             } else {
 
@@ -65,11 +62,6 @@
                         personData[0].person_locations[0].longitude], {
                         balloonContent: personLocationBalloonText(personData[0].person_locations[0])
                     }));
-                    console.log('Center for one point only');
-                    console.log([
-                        personData[0].person_locations[0].latitude,
-                        personData[0].person_locations[0].longitude
-                    ]);
                     myMap.setCenter([
                         personData[0].person_locations[0].latitude,
                         personData[0].person_locations[0].longitude
@@ -81,18 +73,12 @@
                    return [point.latitude, point.longitude]
                 });
 
-                console.log('Locations:');
-                console.log(locations);
-
                 ymaps.route(
                  locations,
                     {
                         mapStateAutoApply: true
                     }).
                  then(function (route) {
-                        //change center, maybe cities are changed
-                        console.log('building route');
-
                         myMap.geoObjects.add(route);
                         let len = locations.length;
                         for (let i = 0; i < len; i++) {

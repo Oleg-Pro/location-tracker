@@ -12190,3 +12190,7 @@ a.text-dark:focus {
   text-align: right;
 }
 
+.api-key .row {
+  justify-content: center;
+}
+

@@ -2,12 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePerson;
 use App\Person;
 use App\City;
+use App\Services\UserPersonService;
 use Illuminate\Http\Request;
 
 class PersonController extends Controller
 {
+    protected $userPersonService;
+
+    /**
+     * PersonController constructor.
+     * @param UserPersonService $userPersonService
+     */
+    public function __construct(UserPersonService $userPersonService)
+    {
+        $this->userPersonService = $userPersonService;
+        $this->middleware(['auth', 'verified']);
+        $this->authorizeResource(Person::class, 'person');
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -16,16 +32,10 @@ class PersonController extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user();
-        $people = Person::with(['city', 'user'])
-            ->orderBy('last_name')
-            ->orderBy('first_name')
-            ->orderBy('last_name')
-            ->whereHas('user', function($query) use ($user) {
-                $query->where('id', $user->id);
-            })->get();
+        $people = $this->userPersonService->getUserPeople($request->user());
+        $paginated = true;
 
-        return view('people.index', compact('people'));
+        return view('people.index', compact('people','paginated'));
     }
 
     /**
@@ -41,16 +51,55 @@ class PersonController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @param StorePerson $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function store(StorePerson $request)
+    {
+        $validatedData = $request->validated();
+        $this->userPersonService->create($validatedData, $request->user());
+
+        return redirect('/people')->with('status', 'Person has been added');
+    }
+
+
+    /**
+     * Show the form for editing the specified resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Person  $person
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function edit(Person $person)
     {
-        $result = $this->storePerson($request);
+        $person->load('city', 'user');
+        $cities = City::orderBy('name')->get();
 
-        return redirect('/people')->with('status', $result);
+        return view('people.edit', compact('cities', 'person'));
+    }
+
+    /**
+     * @param StorePerson $request
+     * @param Person $person
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function update(StorePerson $request, Person $person)
+    {
+        $validatedData = $request->validated();
+        $this->userPersonService->update($person, $validatedData);
+
+        return redirect('/people')->with('status', 'Person has been updated');
+    }
+
+    /**
+     * @param Person $person
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \Exception
+     */
+    public function destroy(Person $person)
+    {
+        $this->userPersonService->delete($person);
+
+        return redirect()->route('people.index')->with('success', 'Stock has been deleted Successfully');
     }
 
     /**
@@ -69,7 +118,7 @@ class PersonController extends Controller
         $person = Person::where('id', '=', $personId)
             ->with(['city', 'personLocations' => function($query) use ($date) {
                 $query->whereRaw('date(created_at) = ?', [$date])
-                ->orderBy('created_at');
+                    ->orderBy('created_at');
             }])
             ->whereHas('user', function($query) use ($user) {
                 $query->where('id', $user->id);
@@ -78,91 +127,4 @@ class PersonController extends Controller
         return $person->toJson();
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Person  $person
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Request $request, Person $person)
-    {
-        $user = $request->user();
-        $person->load('city', 'personLocations')
-            ->whereHas('user', function($query) use ($user) {
-                $query->where('id', $user->id);
-            });
-
-        return $person->toJson();
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Person  $person
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Person $person)
-    {
-        $person->load('city');
-        $cities = City::orderBy('name')->get();
-
-        return view('people.edit', compact('cities', 'person'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Person  $person
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Person $person)
-    {
-        $result = $this->storePerson($request, $person);
-
-        return redirect('/people')->with('status', $result);
-    }
-
-    /**
-     * @param Request $request
-     * @param Person|null $person
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     */
-    private function storePerson(Request $request, Person $person=null)
-    {
-        $validatedData = $request->validate([
-            'city_id' => 'required|exists:cities,id',
-            'first_name' => 'required|max:50',
-            'second_name' => 'required|max:50',
-            'last_name' => 'required|max:50',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'max:20',
-        ]);
-
-        if ($person) {
-            $editing = true;
-        } else {
-            $editing = false;
-            $person = new Person();
-        }
-        $person->fill($validatedData);
-        $person->user()->associate($request->user());
-        $person->save();
-
-        $result = ($editing) ? 'Stock has been updated' : 'Stock has been added';
-
-        return $result;
-    }
-
-
-    /**
-     * @param integer $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy(int $id)
-    {
-        Person::destroy($id);
-
-        return redirect()->route('people.index')->with('success', 'Stock has been deleted Successfully');
-    }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+//use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,5 +15,11 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
+//      return $request->user('api');
+//      return auth('api')->user();
+//      return Auth::guard('api')->user();
     return $request->user();
 });
+
+Route::apiResource('person-locations', 'Api\PersonLocationController');
+Route::apiResource('people', 'Api\PersonController');
