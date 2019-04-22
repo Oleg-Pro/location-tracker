@@ -52,24 +52,24 @@
         function displayRoute(personData)
         {
             myMap.geoObjects.removeAll();
-            if (!personData[0].person_locations.length) {
-                let center = [personData[0].city.latitude, personData[0].city.longitude];
+            if (!personData.person_locations.length) {
+                let center = [personData.city.latitude, personData.city.longitude];
                 myMap.setCenter(center, 17);
             } else {
 
-                if (personData[0].person_locations.length == 1) {
-                    myMap.geoObjects.add(new ymaps.Placemark([personData[0].person_locations[0].latitude,
-                        personData[0].person_locations[0].longitude], {
-                        balloonContent: personLocationBalloonText(personData[0].person_locations[0])
+                if (personData.person_locations.length == 1) {
+                    myMap.geoObjects.add(new ymaps.Placemark([personData.person_locations[0].latitude,
+                        personData.person_locations[0].longitude], {
+                        balloonContent: personLocationBalloonText(personData.person_locations[0])
                     }));
                     myMap.setCenter([
-                        personData[0].person_locations[0].latitude,
-                        personData[0].person_locations[0].longitude
+                        personData.person_locations[0].latitude,
+                        personData.person_locations[0].longitude
                     ], 17);
                     return;
                 }
 
-                let locations = personData[0].person_locations.map(function(point) {
+                let locations = personData.person_locations.map(function(point) {
                    return [point.latitude, point.longitude]
                 });
 
@@ -83,7 +83,7 @@
                         let len = locations.length;
                         for (let i = 0; i < len; i++) {
                             route.getWayPoints().get(i).properties.set({
-                                balloonContent: personLocationBalloonText(personData[0].person_locations[0])
+                                balloonContent: personLocationBalloonText(personData.person_locations[0])
                             });
                         }
                     });

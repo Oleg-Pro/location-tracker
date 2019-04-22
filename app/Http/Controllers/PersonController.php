@@ -101,30 +101,4 @@ class PersonController extends Controller
 
         return redirect()->route('people.index')->with('success', 'Stock has been deleted Successfully');
     }
-
-    /**
-     * @param Request $request
-     * @param $personId
-     * @param $date
-     * @return \Illuminate\Http\Response
-     */
-    function personLocations(Request $request, $personId, $date=null)
-    {
-        if (!isset($date)) {
-            $date = date('Y-m-d');
-        }
-        $user = $request->user();
-
-        $person = Person::where('id', '=', $personId)
-            ->with(['city', 'personLocations' => function($query) use ($date) {
-                $query->whereRaw('date(created_at) = ?', [$date])
-                    ->orderBy('created_at');
-            }])
-            ->whereHas('user', function($query) use ($user) {
-                $query->where('id', $user->id);
-            })->get();
-
-        return $person->toJson();
-    }
-
 }
