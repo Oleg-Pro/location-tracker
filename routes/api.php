@@ -21,5 +21,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::apiResource('person-locations', 'Api\PersonLocationController');
-Route::apiResource('people', 'Api\PersonController');
+Route::apiResource('person-locations', 'Api\v1\PersonLocationController');
+Route::apiResource('people', 'Api\v1\PersonController');
