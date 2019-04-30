@@ -42,7 +42,7 @@ class LocationsReportController extends Controller
     {
         $person = $this->personLocationsService->personLocationsByDate($request->user(), $personId, $date);
 
-        return $person->toJson();
+        return response()->json($person);
     }
 
     /**

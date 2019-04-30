@@ -8,12 +8,32 @@
 
 namespace App\Services;
 
+use App\PersonLocation;
 use App\User;
 use App\Person;
 use Illuminate\Support\Facades\DB;
 
 class PersonLocationsService
 {
+
+    /**
+     * Create person location
+     *
+     * @param array $data
+     * @param User $user
+     * @return PersonLocation
+     */
+    public function create(array $data, User $user)
+    {
+        $personLocation = new PersonLocation();
+        $personLocation->fill($data);
+        $personLocation->save();
+
+        return $personLocation;
+    }
+
+
+
     /**
      * @param User $user
      * @param $personId
@@ -35,7 +55,7 @@ class PersonLocationsService
                 $query->where('id', $user->id);
             })->first();
 
-        return $person;
+        return ($person) ?? new \stdClass();
     }
 
     function peopleLastLocations(User $user)

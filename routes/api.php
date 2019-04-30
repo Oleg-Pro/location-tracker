@@ -21,5 +21,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::apiResource('person-locations', 'Api\v1\PersonLocationController');
 Route::apiResource('people', 'Api\v1\PersonController');
+Route::get('/person-locations/{id}/date/{date?}', 'Api\v1\PersonLocationController@personLocationsByDate')
+    ->name('person-locations')
+    ->where([
+        'id' => '[0-9]+',
+        'date' => '[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])']);
+
+Route::apiResource('person-locations', 'Api\v1\PersonLocationController');

@@ -2,19 +2,36 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Requests\StorePersonLocation;
+use App\Services\PersonLocationsService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PersonLocation as PersonLocationResource;
 
 class PersonLocationController extends Controller
 {
     /**
-     * PersonLocationController constructor.
+     * @var PersonLocationsService
      */
-    public function __construct()
+    protected $personLocationsService;
+
+    /**
+     * PersonLocationController constructor.
+     * @param PersonLocationsService $personLocationsService
+     */
+    public function __construct(PersonLocationsService $personLocationsService)
     {
         $this->middleware('auth:api');
+        $this->personLocationsService = $personLocationsService;
     }
 
+
+    function personLocationsByDate(Request $request, $personId, $date=null)
+    {
+        $person = $this->personLocationsService->personLocationsByDate($request->user(), $personId, $date);
+
+        return response()->json($person);
+    }
 
     /**
      * Display a listing of the resource.
@@ -34,9 +51,14 @@ class PersonLocationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StorePersonLocation $request)
     {
-        //
+        $validatedData = $request->validated();
+        $personLocation = $this->personLocationsService->create($validatedData, $request->user());
+
+//        return response()->json($personLocation);
+
+        return new PersonLocationResource($personLocation);
     }
 
     /**
@@ -47,7 +69,6 @@ class PersonLocationController extends Controller
      */
     public function show($id)
     {
-        //
     }
 
     /**
